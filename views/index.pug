@@ -1,0 +1,14 @@
+extends layout
+
+//-
+    index.pug variables
+    ********************
+    @layout.title {String} title of current page
+    @isAuthenticated {Boolean} shows login/logout button
+
+block content
+    p Welcome to questions
+    if isAuthenticated
+        a(href='/logout') Logout
+    else
+        a(href='/auth/google') Login with google

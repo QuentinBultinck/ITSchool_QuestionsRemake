@@ -1,0 +1,13 @@
+extends layout
+
+//-
+    error.pug variables
+    ********************
+    @layout.title {String} title of current page
+    @error {String} error message to show
+
+
+block content
+    h1=title
+    p.error=error
+    a(href='/') Back to home page
