@@ -2,9 +2,9 @@
   "name": "questions",
   "version": "1.0.0",
   "description": "Ask and answer questions, with a live option",
-  "main": "index.js",
   "dependencies": {
     "body-parser": "^1.18.2",
+    "bootstrap": "^4.0.0-beta.2",
     "cookie-parser": "^1.4.3",
     "dotenv": "^4.0.0",
     "express": "^4.16.2",

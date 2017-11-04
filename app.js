@@ -14,6 +14,14 @@ const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const passport = require('passport');
 
 /**
+ * Load dev dependencies
+ * TODO Setup different running modes.
+ * More info: https://www.hacksparrow.com/running-express-js-in-production-mode.html
+ * https://stackoverflow.com/questions/10714315/node-js-express-and-using-development-versus-production-in-app-configure
+ * https://www.npmjs.com/package/config
+ */
+
+/**
  * Load environment variables
  * TODO Look for a better solution for .env files and variables
  */
@@ -41,7 +49,7 @@ app.set('view engine', 'pug');
  * Express server middleware
  */
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+app.use(logger('dev')); //Set wanted logging format, more info @ https://github.com/expressjs/morgan
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -54,6 +62,33 @@ app.use(session({
 );
 app.use(passport.initialize());
 app.use(passport.session());
+
+/**
+ * Development error handler middleware
+ * prints the stacktrace
+ */
+if (app.get('env') === 'development') {
+    app.use(function (err, req, res, next) {
+        res.status(err.status || 500);
+        res.render('error', {
+            errorMsg: err.message,
+            stackTrace: err
+        });
+    });
+}
+/**
+ * Production error handler middleware
+ * no stacktraces leaked to user
+ */
+else if (app.get('env') === 'production') {
+    app.use(function (err, req, res, next) {
+        res.status(err.status || 500);
+        res.render('error', {
+            errorMsg: err.message,
+            stackTrace: {}
+        });
+    });
+}
 
 /**
  * Serve public folder static
@@ -83,7 +118,6 @@ passport.serializeUser(function (user, done) {
     //Look at PassportJS docs > Sessions section
     done(null, user);
 });
-
 passport.deserializeUser(function (user, done) {
     done(null, user);
 });
@@ -91,9 +125,9 @@ passport.deserializeUser(function (user, done) {
 /**
  * Setup controllers
  */
-app.use('/', require("./controllers/main"));
-app.use('/api', require("./controllers/api"));
-app.use("/auth", require("./controllers/authenticate"));
+app.use('/', require("./routes/main"));
+app.use('/api', require("./routes/api"));
+app.use("/auth", require("./routes/authenticate"));
 
 /**
  * Any other routes return 404
