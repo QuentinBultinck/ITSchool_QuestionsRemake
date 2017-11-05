@@ -4,6 +4,8 @@
     @title {String} title of current page
     @header.isAuthenticated {Boolean} shows login/logout button
 
+include ./mixins/mixin_header.pug
+
 doctype html
 html(lang="en")
     head
@@ -15,9 +17,10 @@ html(lang="en")
         link(rel='stylesheet', href='/css/lib/bootstrap/custom-bootstrap.css')
         link(rel='stylesheet', href='/css/lib/bootstrap/bootstrap-social-5.1.1.min.css')
         link(rel='stylesheet', href='/css/style.css')
-    body
+
+    body(style="margin-top: 70px")
         //- Loads the header from another file
-        include ./partials/header.pug
+        +header(isAuthenticated)
 
         //- Blocks can be owerwritten/appended/prepended by extending this file, more info @ https://pugjs.org/language/inheritance.html
         block content

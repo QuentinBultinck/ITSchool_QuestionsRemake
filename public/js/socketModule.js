@@ -12,7 +12,7 @@ const socketModule = (function () {
             console.log(error);
             gInterface.showError(error);
         })
-        .on("new_thread", function (threadHTML) {
+        .on("new_thread_available", function (threadHTML) {
             gInterface.addThread(threadHTML);
         })
         .on("threads", function (threadsHTML) {
@@ -24,6 +24,9 @@ const socketModule = (function () {
     return {
         sendQuestion: function (question) {
             socket.emit("new_question", question);
+        },
+        sendAnswer: function (threadId, answer) {
+            socket.emit("new_answer", {threadId, answer});
         },
         isConnected: function () {
             return socket.connected;
