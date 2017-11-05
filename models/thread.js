@@ -18,8 +18,8 @@ let questionSetter = function (q) {
 };
 
 const ThreadSchema = Schema({
-    author: {type: Schema.ObjectId, ref: "User", required: true},
-    question: {type: String, set: questionSetter, required: true},
+    author: {type: Schema.ObjectId, ref: "User", required: [true, 'Please login to ask a question.']},
+    question: {type: String, set: questionSetter, required: [true, "Question can't be empty."]},
     creationDate: {type: Date, default: Date.now},
     hasApprovedAnswer: {type: Boolean, default: false},
     votes: {Number, default: 0},

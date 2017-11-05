@@ -2,6 +2,7 @@
     layout.pug variables
     ********************
     @title {String} title of current page
+    @header.isAuthenticated {Boolean} shows login/logout button
 
 doctype html
 html(lang="en")
@@ -15,29 +16,8 @@ html(lang="en")
         link(rel='stylesheet', href='/css/lib/bootstrap/bootstrap-social-5.1.1.min.css')
         link(rel='stylesheet', href='/css/style.css')
     body
-        header
-            nav(class="navbar navbar-expand-md navbar-dark bg-primary" role="navigation")
-                a(class="navbar-brand mb-0 h1" href="/") Questions
-                button(class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation")
-                    i(class="navbar-toggler-icon")
-                div(class="collapse navbar-collapse" id="navbarSupportedContent")
-                    ul(class="navbar-nav mr-auto")
-                        li(class="nav-item active")
-                            a(class="nav-link" href="/") Home
-                                span(class="sr-only") (current)
-                        if isAuthenticated
-                            a(class="nav-link" href='/logout') Logout
-                        else
-                            li(class="nav-item dropdown")
-                                a(class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false") Login
-                                div(class="dropdown-menu border border-secondary" aria-labelledby="navbarDropdown")
-                                    h6(class="dropdown-header") Your Howest account is a Google account
-                                    a(class="btn btn-block btn-social btn-google" href='/auth/google') Sign in with Google
-                                        i(class="fa fa-google")
-                    form(class="form-inline" action="#")
-                        input(class="form-control mr-sm-2" type="search" placeholder="Disabled" aria-label="Search" disabled)
-                        button(class="btn btn-outline-light" type="submit" disabled)
-                            i(class="fa fa-search")
+        //- Loads the header from another file
+        include ./partials/header.pug
 
         //- Blocks can be owerwritten/appended/prepended by extending this file, more info @ https://pugjs.org/language/inheritance.html
         block content
@@ -50,4 +30,3 @@ html(lang="en")
 
         //- Our js resources
         block scripts
-            script(src="/js/main.js")

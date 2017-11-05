@@ -8,6 +8,8 @@ const passport = require('passport');
  */
 router.route('/google')
     .get(passport.authenticate('google', {
+        hd: 'howest.be', //Only show accounts that match the hosted domain.
+        prompt: 'select_account', //Ensure the user can always select an account when sent to Google.
             scope: ['email', 'profile']
         })
     );
@@ -22,9 +24,9 @@ router.route('/google/callback')
  * Authentication failure
  */
 router.get("/failure", function (req, res) {
-    res.render("error", {
-        title: "login",
-        error: "Failed to login"
+    res.render('error', {
+        title: "Login failure",
+        errorMsg: "For your information: \nWe only allow accounts from the howest.be domain."
     });
 });
 

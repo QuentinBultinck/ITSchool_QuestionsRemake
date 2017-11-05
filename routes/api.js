@@ -28,7 +28,7 @@ router.get('/', function (req, res) {
 });
 
 router.route('/threads')
-    .get(functions.getAllThreads)
-    .post(functions.postNewThread);
+    .post(functions.postNewThread)
+    .get(functions.getAllThreads);
 
 module.exports = router;

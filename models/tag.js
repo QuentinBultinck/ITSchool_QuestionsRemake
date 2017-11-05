@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 let TagSchema = Schema({
-    name: {type: String, required: true, unique: true},
+    name: {type: String, required: true, unique: true, uppercase: true},
     threads: [{type: Schema.ObjectId, ref: "Thread"}],
 });
 

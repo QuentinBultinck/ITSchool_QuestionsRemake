@@ -1,6 +1,7 @@
 /**
  * Load module dependencies.
  */
+const http = require('http');
 const express = require('express');
 const path = require('path');
 const favicon = require('serve-favicon');
@@ -8,8 +9,9 @@ const logger = require('morgan');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require("express-session");
+const MongoStore = require('connect-mongo')(session);
 const mongoose = require("mongoose");
-mongoose.Promise = global.Promise;
+mongoose.Promise = global.Promise; //Solution for Mongoose Promise is deprecated
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const passport = require('passport');
 
@@ -28,6 +30,11 @@ const passport = require('passport');
 require('dotenv').config();
 
 /**
+ * Load models
+ */
+const User = require("./models/user");
+
+/**
  * Connect to MongoDB with mongoose
  */
 mongoose.connect(process.env.MONGODB_URL, {useMongoClient: true}).catch(err => {
@@ -35,9 +42,15 @@ mongoose.connect(process.env.MONGODB_URL, {useMongoClient: true}).catch(err => {
 });
 
 /**
- * Make instances.
+ * Make instances and start server
  */
 const app = express();
+const httpServer = http.createServer(app);
+const port = process.env.PORT || 3000;
+httpServer.listen(port, function () {
+    console.log(`Server running on port ${port}`);
+});
+const sessionStore = new MongoStore({mongooseConnection: mongoose.connection});
 
 /**
  * View engine setup.
@@ -49,19 +62,26 @@ app.set('view engine', 'pug');
  * Express server middleware
  */
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev')); //Set wanted logging format, more info @ https://github.com/expressjs/morgan
+// app.use(logger('dev')); //Set wanted logging format, more info @ https://github.com/expressjs/morgan
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(session({
+    //TODO Look further into sessions
+    store: sessionStore,
         secret: process.env.SESSION_KEY,
-        cookie: {maxAge: 2628000000},
-        resave: false,
-        saveUninitialized: false
+    resave: false, //don't save session if unmodified
+    saveUninitialized: false, // don't create session until something stored
+    unset: 'destroy', //Remove session from sessionStore when user deserializes
     })
 );
 app.use(passport.initialize());
 app.use(passport.session());
+
+/**
+ * Setup socket.io
+ */
+require("./socket-io")(httpServer, sessionStore);
 
 /**
  * Development error handler middleware
@@ -103,27 +123,32 @@ passport.use(new GoogleStrategy({
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: process.env.GOOGLE_CLIENT_CALLBACK_URL,
         passReqToCallback: true
-    },
-    function (request, accessToken, refreshToken, profile, done) {
-        //TODO Do something with the returned profile
-        // console.log(profile);
-        return done(null, profile);
-        // User.findOneOrCreate({ googleId: profile.id }, function (err, user) {
-        //     return done(err, user);
-        // });
+    }, function (request, accessToken, refreshToken, profile, done) {
+        if (profile._json.domain && profile._json.domain.includes("howest.be")) {
+            //findOneOrCreate(condition, createProps, cb)
+            User.findOneOrCreate({email: profile.email}, {
+                displayName: profile.displayName,
+                email: profile.email,
+                domain: profile._json.domain,
+                googleId: profile.id
+            }, function (err, user) {
+                done(null, user._id);
+            });
+        } else {
+            done(null, null);
+        }
     }
 ));
-passport.serializeUser(function (user, done) {
-    //TODO Reduce the amount of  data set in the user cookie
-    //Look at PassportJS docs > Sessions section
-    done(null, user);
+passport.serializeUser(function (userId, done) {
+    done(null, userId);
 });
-passport.deserializeUser(function (user, done) {
-    done(null, user);
+passport.deserializeUser(function (userId, done) {
+    done(null, userId);
 });
 
+
 /**
- * Setup controllers
+ * Setup routes
  */
 app.use('/', require("./routes/main"));
 app.use('/api', require("./routes/api"));
@@ -137,12 +162,4 @@ app.get("*", function (req, res) {
         title: "404 Not Found",
         error: "Your URL is incorrect."
     });
-});
-
-/**
- * Start server
- */
-const port = process.env.PORT;
-app.listen(port, function () {
-    console.log(`Server running on port ${port}`);
 });
