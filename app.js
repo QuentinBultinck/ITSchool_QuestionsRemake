@@ -67,12 +67,12 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(session({
-    //TODO Look further into sessions
-    store: sessionStore,
+        //TODO Look further into sessions
+        store: sessionStore,
         secret: process.env.SESSION_KEY,
-    resave: false, //don't save session if unmodified
-    saveUninitialized: false, // don't create session until something stored
-    unset: 'destroy', //Remove session from sessionStore when user deserializes
+        resave: false, //don't save session if unmodified
+        saveUninitialized: false, // don't create session until something stored
+        unset: 'destroy', //Remove session from sessionStore when user deserializes
     })
 );
 app.use(passport.initialize());
