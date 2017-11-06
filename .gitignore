@@ -1,0 +1,5 @@
+.idea
+/node_modules
+
+#TODO Env file should be private
+.env
